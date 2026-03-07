@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Notepad LITE</title>
+
+  <link rel="stylesheet" href="assets/github-dark.min.css">
+  <link rel="stylesheet" href="assets/highlight-overrides.css">
+  <link rel="stylesheet" href="styles.css">
+  
+  <script src="assets/highlight.min.js"></script>
+  <script src="assets/highlight-init.js"></script>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="brand">Notepad LITE</div>
+
+      <div class="pill" id="wsPill">Workspace: <span id="wsName">Not set</span></div>
+      <div class="pill">Auto-save: <span id="saveState">idle</span></div>
+
+      <label class="btn" style="display:inline-flex;gap:8px;align-items:center;">
+        Import backup <input id="fileImport" type="file" accept="application/json" style="display:none">
+      </label>
+	  <button id="btnExport" title="Download a backup of all notes and bookmarks">Export backup</button>
+
+      <button class="btn-accent" id="btnOpenWs" title="Choose a folder to store notes as real .md files">Open workspace folder</button>
+      <button class="btn-danger" id="btnDisconnectWs" title="Stop using workspace folder and switch back to browser storage">Disconnect workspace</button>
+
+      <div class="spacer"></div>
+
+      <button class="btn-accent" id="btnToggleRight">Bookmarks</button>
+      <button class="btn-accent" id="btnTogglePreview">Preview</button>
+	 
+<div class="dropdown" id="exportDropdown">
+  <button class="btn-lime" id="btnExportMenu" title="Export note">Export │ ▼</button>
+
+  <div class="dropdown-menu" id="exportMenu">
+    <button type="button" id="btnTxt">Export as TXT</button>
+    <button type="button" id="btnPdf">Print/Save as PDF</button>
+  </div>
+</div>
+	 
+	 
+    </div>
+
+    <aside class="left">
+      <div class="section">
+        <h3>Notes</h3>
+        <div class="row">
+          <input id="newName" type="text" placeholder="New note name…" style="flex:1;min-width:140px"/>
+          <button class="btn-accent" id="btnNew">Create</button>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <input id="search" type="text" placeholder="Search notes…" style="flex:1"/>
+
+        </div>
+      </div>
+      <div class="notes" id="noteList"></div>
+    </aside>
+
+    <main class="main">
+      <div class="editor-wrap">
+        <div class="editor-head">
+          <div class="title-row">
+          <div class="title" id="currentTitle">No note selected</div>
+          <button id="btnRename" class="btn-ghost" title="Rename note">✏️</button>
+	      </div>
+          <div class="spacer"></div>
+          <div class="status" id="currentMeta"></div>
+		  
+		  <button class="btn-danger" id="btnDelete" title="Delete current note">Delete</button>
+        </div>
+
+        <div class="editor" id="editorBox">
+          <textarea id="editor" placeholder="Type here…"></textarea>
+          <div class="preview" id="preview"></div>
+        </div>
+      </div>
+
+      <aside class="right collapsed" id="rightPanel">
+<div class="right-head">
+  <h3>Bookmarks</h3>
+  <div class="row">
+    <input id="bookmarkSearch" type="text" placeholder="Search bookmarks…" style="width:220px;max-width:40vw" />
+    <button id="btnScan" class="btn-accent" title="Scan this note and add any links it finds">Scan note for links</button>
+  </div>
+</div>
+
+<div class="right-body">
+  <div class="card" id="noteCard">
+    <div class="card-h">
+      <div class="t"><b>LINKS</b></div>
+
+      <div class="row">
+        <select id="noteSort">
+          <option value="newest" selected>Newest</option>
+          <option value="oldest">Oldest</option>
+        </select>
+
+        <button class="btn-ghost" id="btnAddNote" title="Add a link to this note">
+          + Add
+        </button>
+      </div>
+
+    </div>
+
+    <div class="card-b" id="noteCardBody">
+      <div id="noteLinks" class="links"></div>
+      <div id="noteLinksEmpty" class="empty" style="display:none;">
+        No links for this note yet.
+      </div>
+    </div>
+  </div>
+
+          <div class="card" id="globalCard">
+            <div class="card-h">
+              <div class="t"><b>ALL LINKS</b> (ALL NOTES)</div>
+              <div class="row">
+                <select id="globalSort">
+                  <option value="newest" selected>Newest</option>
+                  <option value="oldest">Oldest</option>
+                </select>
+				<button id="btnAddGlobal" title="Add a global link">+ Add</button>
+              </div>
+            </div>
+            <div class="card-b" id="globalCardBody">
+              <div id="globalLinks" class="links"></div>
+              <div id="globalLinksEmpty" class="empty" style="display:none;">No global links yet.</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </div>
+  
+<div id="popupBackdrop" class="backdrop" style="display:none;"></div>
+<div id="popupBox" class="popup" style="display:none;">
+  <div id="popupMessage"></div>
+
+  <div id="popupList" class="popup-list" style="display:none;"></div>
+
+  <div class="popup__btns">
+    <button id="popupConfirm" class="popup__btn">OK</button>
+    <button id="popupCancel" class="popup__btn popup__btn--cancel">Cancel</button>
+  </div>
+</div>
+
+<script src="script.js"></script> 
+ 
+</body>
+</html>

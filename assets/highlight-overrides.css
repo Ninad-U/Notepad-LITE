@@ -1,0 +1,60 @@
+/* Inline code */
+.preview :not(pre) > code{
+  background:#a0a0a0 !important;
+  border:none !important;
+  color:#111 !important;
+  padding:.12em .35em;
+  border-radius:8px;
+  font-family:var(--mono);
+}
+
+/* Full code blocks */
+.preview pre{
+  background:#0b0d12 !important;
+  border:1px solid var(--border) !important;
+  border-radius:12px;
+  padding:12px;
+  overflow:auto;
+}
+
+.preview pre code{
+  display:block;
+  background:transparent !important;
+  border:none !important;
+  padding:0 !important;
+  border-radius:0 !important;
+  font-family:var(--mono);
+  color:inherit;
+}
+
+/* Print / PDF */
+@media print{
+  .preview pre,
+  .preview code,
+  .preview pre code,
+  .preview pre code *{
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .preview pre{
+    background:#000 !important;
+    border:1px solid #000 !important;
+    color:#fff !important;
+    white-space:pre !important;
+    overflow:visible !important;
+  }
+
+  .preview pre code{
+    background:transparent !important;
+    border:none !important;
+    color:inherit !important;
+    white-space:inherit !important;
+  }
+
+  .preview :not(pre) > code{
+    background:#a0a0a0 !important;
+    color:#111 !important;
+    border:none !important;
+  }
+}
