@@ -919,7 +919,7 @@ async function flushSave(force){
   state._lastFp = fp;
 
   try{
-    el.saveState.textContent = "saving…";
+    el.saveState.textContent = "pending";
 
     if (hasWorkspace()){
       if (!await FS.verifyPerm(state.wsHandle, true)){
