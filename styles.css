@@ -24,7 +24,7 @@ body{
 .app{
   height:100%;
   display:grid;
-  grid-template-columns:260px 1fr;
+  grid-template-columns:360px 1fr;
   grid-template-rows:56px 1fr;
   grid-template-areas:
   "top top"
@@ -167,7 +167,7 @@ input[type="text"]::placeholder{color:#7b86a8}
   backdrop-filter:blur(10px);
   display:flex;
   flex-direction:column;
-  min-width:260px;
+  min-width:360px;
     min-height:0;
 }
 .left .section{padding:12px;border-bottom:1px solid var(--border)}
