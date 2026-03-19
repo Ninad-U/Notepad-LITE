@@ -594,7 +594,7 @@ function extractLinks(text){
 
 function renameBookmarkInList(list, item, newTitle){
   return list.map(x => {
-    if (x.ts === item.ts && x.url === item.url) {
+    if (x.url === item.url) {
       return { ...x, title: newTitle };
     }
     return x;
@@ -636,7 +636,11 @@ function linkRow(item, opts){
 
     <div class="link-main">
       <a class="u" href="${item.url}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>
-      <div class="ts">${ts}</div>
+      <div class="ts">
+      <a href="${item.url}" target="_blank" rel="noopener noreferrer">
+      ${escapeHtml(item.url)}
+      </a>
+      </div>
     </div>
 
     <div class="link-actions">
@@ -656,6 +660,7 @@ function linkRow(item, opts){
   const editBtn = wrap.querySelector(".link-edit");
   const delBtn = wrap.querySelector(".link-del");
 
+  // ✏️ RENAME
   editBtn.onclick = () => {
     const currentTitle = item.title || "";
     const newTitle = (prompt("Rename bookmark:", currentTitle) || "").trim();
@@ -674,20 +679,53 @@ function linkRow(item, opts){
     renderLinks();
   };
 
+  // 🗑 DELETE
   delBtn.onclick = async () => {
     if (!(await showConfirm("Remove this bookmark?"))) return;
 
     if (opts.note){
-      const arr = LS.getNoteLinks(state.current);
-      LS.setNoteLinks(
-        state.current,
-        arr.filter(x => !(x.ts === item.ts && x.url === item.url))
-      );
+      const noteId = state.current;
+
+      // Remove from NOTE
+      let noteArr = LS.getNoteLinks(noteId);
+      noteArr = noteArr.filter(x => x.url !== item.url);
+      LS.setNoteLinks(noteId, noteArr);
+
+      // Check if exists in other notes
+      const allNotes = LS.getIndex();
+      let existsElsewhere = false;
+
+      for (let note of allNotes) {
+        if (note.name === noteId) continue;
+
+        const links = LS.getNoteLinks(note.name);
+        if (links.some(l => l.url === item.url)) {
+          existsElsewhere = true;
+          break;
+        }
+      }
+
+      // Remove from -All links- if unused
+      if (!existsElsewhere) {
+        let globalArr = LS.getGlobalLinks();
+        globalArr = globalArr.filter(l => l.url !== item.url);
+        LS.setGlobalLinks(globalArr);
+      }
+
     } else {
-      const arr = LS.getGlobalLinks();
-      LS.setGlobalLinks(
-        arr.filter(x => !(x.ts === item.ts && x.url === item.url))
-      );
+      // Remove from -All links-
+      let globalArr = LS.getGlobalLinks();
+      globalArr = globalArr.filter(x => x.url !== item.url);
+      LS.setGlobalLinks(globalArr);
+
+      // Also remove from ALL NOTES
+      const allNotes = LS.getIndex();
+
+      for (let note of allNotes) {
+        let links = LS.getNoteLinks(note.name);
+        links = links.filter(l => l.url !== item.url);
+        LS.setNoteLinks(note.name, links);
+      }
     }
 
     renderLinks();
@@ -838,11 +876,25 @@ function setHeader(){
   if (!state.current){
     el.currentTitle.textContent = "No note selected";
     el.currentMeta.textContent = "";
+
+    el.editor.disabled = true;
+    el.editorBox.style.opacity = "0.5";
+    el.editorBox.style.pointerEvents = "none";
+
+    el.editor.placeholder = "Select or create a note to start writing...";
+
     return;
   }
+
   const meta = state.notes.find(n=>n.name===state.current);
   el.currentTitle.textContent = state.current;
   el.currentMeta.textContent = meta ? ("Updated: " + new Date(meta.updatedAt).toLocaleString()) : "";
+
+  el.editor.disabled = false;
+  el.editorBox.style.opacity = "1";
+  el.editorBox.style.pointerEvents = "auto";
+
+  el.editor.placeholder = "Type here...";
 }
 
 async function refreshNotes(){
@@ -986,10 +1038,22 @@ async function deleteCurrent(){
   }
 
   state.current = null;
-  el.editor.value = "";
-  renderPreview();
+
   await refreshNotes();
-  renderLinks();
+
+  if (state.notes.length){
+    await openNote(state.notes[0].name);
+    el.editor.disabled = false;
+    el.editor.style.opacity = "1";
+  } else {
+    el.editor.value = "";
+    renderPreview();
+    setHeader();
+    renderLinks();
+
+    el.editor.disabled = true;
+    el.editor.style.opacity = "0.6"; 
+  }
 }
 
 async function renameCurrentNote(){
@@ -1248,12 +1312,24 @@ async function promptLink(){
 
 async function addNoteLink(){
   if (!state.current) return alert("Select a note first.");
+
   const item = await promptLink();
   if (!item) return;
 
-  const arr = LS.getNoteLinks(state.current);
-  arr.push(item);
-  LS.setNoteLinks(state.current, arr);
+  // Add to -Links-
+  const noteArr = LS.getNoteLinks(state.current);
+  noteArr.push(item);
+  LS.setNoteLinks(state.current, noteArr);
+
+  // ALSO add to -All links- (no duplicates)
+  let globalArr = LS.getGlobalLinks();
+  const exists = globalArr.some(x => x.url === item.url);
+
+  if (!exists) {
+    globalArr.push(item);
+    LS.setGlobalLinks(globalArr);
+  }
+
   renderLinks();
 }
 
@@ -1494,6 +1570,25 @@ el.btnRename.onclick = renameCurrentNote;
 
 el.editor.addEventListener("input", () => { scheduleSave(); renderPreview(); });
 el.editor.addEventListener("paste", () => setTimeout(() => { scheduleSave(); renderPreview(); }, 0));
+
+el.editor.addEventListener("keydown", (e) => {
+  if (e.key === "Tab") {
+    e.preventDefault();
+
+    const start = el.editor.selectionStart;
+    const end = el.editor.selectionEnd;
+    const value = el.editor.value;
+
+    el.editor.value =
+      value.slice(0, start) + "\t" + value.slice(end);
+
+    el.editor.selectionStart = el.editor.selectionEnd = start + 1;
+
+    scheduleSave();
+    renderPreview();
+  }
+});
+
 el.search.addEventListener("input", renderNotesList);
 
 window.addEventListener("resize", updateBookmarkCardSizing);
@@ -1580,7 +1675,7 @@ window.addEventListener("keydown", async (e) => {
     if (state.notes.length === 0){
       LS.setNote(
         "Welcome",
-        "# Welcome! This is your offline notepad.\n\n" +
+        "# Welcome! This is your offline notepad.\n" +
 		"## What's supported:\n" +
 		"- Headings (#, ##, ###)\n" +
 		"- Lists (-, *)\n" +
@@ -1590,9 +1685,9 @@ window.addEventListener("keydown", async (e) => {
 		"- Links and plain URLs\n" +
 		"- Horizontal rule (---)\n\n" +
 
-        "## Important\n\n" +
+        "## Important\n" +
         "Your notes are currently stored in this browser.\n" +
-        "They may be lost if browser data is cleared.\n\n" +
+        "They may be lost if browser data is cleared.\n" +
 
         "For important notes, use a **workspace folder**.\n" +
         "Example setup:\n" +
@@ -1601,9 +1696,10 @@ window.addEventListener("keydown", async (e) => {
         "- Choose that folder using the **Open workspace folder** button from the top bar\n\n" +
 
         "Workspace requires a Chrome-based browser.\n" +
-        "Workspace storage is safer, but you may need to select the folder everytime this notepad is reopened.\n\n" +
+        "Workspace storage is safer, but you may need to select the folder everytime this notepad is reopened.\n" +
 
-        "Start exploring by trying the **Preview** button in the top-right corner."
+		"Tip: You can set this `index.html` as a desktop shortcut for easier access.\n" +  
+        "Start exploring by trying the **Preview** button in the top-right corner. Happy noting!"
       );
       await refreshNotes();
     }

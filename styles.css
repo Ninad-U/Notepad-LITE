@@ -248,6 +248,11 @@ input[type="text"]::placeholder{color:#7b86a8}
   display:flex;
   gap:10px;
 }
+#saveState{
+  display:inline-block;
+  min-width:55px;
+  text-align:center;
+}
 textarea{
   flex:1;
   min-width:0;
@@ -258,7 +263,7 @@ textarea{
   background:rgba(10,12,20,.55);
   color:var(--text);
   font-family:var(--mono);
-  font-size:13px;
+  font-size:15px;
   line-height:1.55;
   outline:none;
   box-shadow:var(--shadow);
@@ -439,6 +444,30 @@ textarea:focus{border-color:rgba(122,162,255,.55)}
   overflow-x:hidden;
 }
 #globalCardBody{overflow:hidden}
+.link .ts{
+  font-size:11px;
+  color:var(--muted);
+  min-width: 0;
+  overflow: hidden;          
+}
+
+.link .ts a{
+  display: inline-block;    
+  max-width: 100%;           
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 11px;
+}
+
+.link .ts a:hover{
+  text-decoration: underline;
+  color: var(--text);
+}
 .link{
   display:flex;
   align-items:flex-start;
