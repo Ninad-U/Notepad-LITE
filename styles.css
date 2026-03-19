@@ -250,7 +250,7 @@ input[type="text"]::placeholder{color:#7b86a8}
 }
 #saveState{
   display:inline-block;
-  min-width:55px;
+  min-width:35px;
   text-align:center;
 }
 textarea{
