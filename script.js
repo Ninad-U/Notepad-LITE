@@ -881,7 +881,7 @@ function setHeader(){
     el.editorBox.style.opacity = "0.5";
     el.editorBox.style.pointerEvents = "none";
 
-    el.editor.placeholder = "Select or create a note to start writing...";
+    el.editor.placeholder = "Create a note to start writing...";
 
     return;
   }
