@@ -919,7 +919,7 @@ async function flushSave(force){
   state._lastFp = fp;
 
   try{
-    el.saveState.textContent = "pending";
+    el.saveState.textContent = "saving";
 
     if (hasWorkspace()){
       if (!await FS.verifyPerm(state.wsHandle, true)){
@@ -951,7 +951,7 @@ async function flushSave(force){
 function scheduleSave(){
   if (!state.current) return;
 
-  el.saveState.textContent = "pending";
+  el.saveState.textContent = "saving";
 
   const meta = state.notes.find(n => n.name === state.current);
   if (meta){
